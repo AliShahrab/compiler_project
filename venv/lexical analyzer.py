@@ -1,97 +1,127 @@
 import re
 
-input_file = open("inp.txt", "r")
 
-KEYWORD = ["if",
-           "else",
-           "void",
-           "int",
-           "while",
-           "break",
-           "continue",
-           "switch",
-           "default",
-           "case",
-           "return"]
+class Compiler:
+    def __init__(self):
+        self.input_file = ''
+        self.input = ''
+        self.index = 0
 
-SYMBOL = [',',
-          ':',
-          ';',
-          '{',
-          '}',
-          '(',
-          ')',
-          '[',
-          ']',
-          '+',
-          '-',
-          '*',
-          '<',
-          '=',
-          '==']
+        self.KEYWORD = ["if",
+               "else",
+               "void",
+               "int",
+               "while",
+               "break",
+               "continue",
+               "switch",
+               "default",
+               "case",
+               "return"]
 
-WHITESPACE = [chr(32),
-              chr(10),
-              chr(11),
-              chr(12),
-              chr(13),
-              chr(9)]
+        self.SYMBOL = [',',
+              ':',
+              ';',
+              '{',
+              '}',
+              '(',
+              ')',
+              '[',
+              ']',
+              '+',
+              '-',
+              '*',
+              '<',
+              '=',
+              '==']
+
+        self.WHITESPACE = [chr(32),
+                  chr(10),
+                  chr(11),
+                  chr(12),
+                  chr(13),
+                  chr(9)]
+
+    def open_file(self, input_file):
+        self.input_file = open(input_file, "r")
+        # print(self.input)
+
+    def get_next_token(self,):
+        aux = ""
+        if self.index >= len(self.input) or self.input[self.index] is '\n':
+            return 0, 0, 0
+
+        while True:
+            if self.input[self.index] in self.SYMBOL:
+                if aux == "":
+                    return self.input[self.index], "SYMBOL", self.index + 1
+                else:
+                    return aux, category_aux, self.index
+            elif self.input[self.index] in self.WHITESPACE:
+                if aux == "":
+                    return self.input[self.index], "WHITESPACE", self.index + 1
+                else:
+                    return aux, category_aux, self.index + 1
+
+            aux += self.input[self.index]
+            category_aux = self.set_token_category(aux)
+
+            if category_aux == "KEYWORD" and ((self.input[self.index + 1] in self.WHITESPACE) or (self.input[self.index + 1] in self.SYMBOL)):
+                return aux, category_aux, self.index + 1
+
+            elif category_aux is None:
+                return aux, category_aux, self.index + 1
+
+            self.index += 1
 
 
-def get_next_token(inp, i=0):
-    aux = ""
-    if i >= len(inp) or inp[i] is '\n':
-        return 0, 0, 0
+    def set_token_category(self, token):
 
-    while True:
-        if inp[i] in SYMBOL:
-            if aux == "":
-                return inp[i], "SYMBOL", i + 1
-            else:
-                return aux, category_aux, i
-        elif inp[i] in WHITESPACE:
-            if aux == "":
-                return inp[i], "WHITESPACE", i + 1
-            else:
-                return aux, category_aux, i + 1
+        category = None
+        if re.match("^[0-9]+$", token):
+            category = "NUM"
 
-        aux += inp[i]
-        category_aux = set_token_category(aux)
+        elif token in self.KEYWORD:
+            category = "KEYWORD"
 
-        if category_aux == "KEYWORD" and ((inp[i + 1] in WHITESPACE) or (inp[i + 1] in SYMBOL)):
-            return aux, category_aux, i + 1
+        elif token in self.SYMBOL:
+            category = "SYMBOL"
 
-        elif category_aux is None:
-            return aux, category_aux, i + 1
+        elif token == "//":
+            category = "cmt//"
 
-        i += 1
+        elif token == "/*":
+            category = "cmt/*"
+
+        elif token in self.WHITESPACE:
+            category = "WHITESPACE"
+
+        elif re.match("^[A-Za-z][A-Za-z0-9]*$", token):
+            category = "ID"
+
+        return category
+
+    def process(self):
+        while True:
+
+            self.input = self.input_file.readline()
+            self.index = 0
+            while True:
+                token, token_category, self.index = self.get_next_token()
+                if token == token_category == self.index == 0:
+                    break
+                print(token, token_category, self.index)
+            if self.input is "":
+                break
 
 
-def set_token_category(token):
+my_comiler = Compiler()
+my_comiler.open_file('inp.txt')
+my_comiler.process()
 
-    category = None
-    if re.match("^[0-9]+$", token):
-        category = "NUM"
 
-    elif token in KEYWORD:
-        category = "KEYWORD"
 
-    elif token in SYMBOL:
-        category = "SYMBOL"
 
-    elif token == "//":
-        category = "cmt//"
-
-    elif token == "/*":
-        category = "cmt/*"
-
-    elif token in WHITESPACE:
-        category = "WHITESPACE"
-
-    elif re.match("^[A-Za-z][A-Za-z0-9]*$", token):
-        category = "ID"
-
-    return category
 #
 # print(set_token_category("92342348"))
 # print(set_token_category(";"))
@@ -102,14 +132,3 @@ def set_token_category(token):
 # print(set_token_category("else"))
 # print(set_token_category(" "))
 
-while True:
-
-    inp_str = input_file.readline()
-    i = 0
-    while True:
-        token, token_category, i = get_next_token(inp_str, i)
-        if token == token_category == i == 0:
-            break
-        print(token, token_category, i)
-    if inp_str is "":
-        break
