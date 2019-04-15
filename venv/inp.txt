@@ -1,0 +1,17 @@
+1	void main(void){
+2		int a = 0;
+3		int b==3;
+4		a = 2 + +2;
+5		a = a + -3;
+6		cde = a;
+7		if (b== 3) {
+8			a = 3;
+9			cde = -7;
+10		}
+11		else
+12		{
+13			b = a < cde;
+14			{cde = 2;
+15		}}
+16		return;
+17	}
